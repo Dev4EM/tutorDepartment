@@ -1,5 +1,7 @@
 import React from 'react';
-import toast from 'react-toastify';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const TaskCard = ({ task, userType, token, onTaskUpdated, onTaskDeleted }) => {
   const dueDate = new Date(task.dueDate).toLocaleDateString();
