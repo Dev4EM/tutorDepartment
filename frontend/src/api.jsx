@@ -1,6 +1,6 @@
 import useUserAuthStore from "./stores/userAuthStore";
 
-const API_BASE_URL = 'https://api.tutor.esromagica.in/api'; // Update if using a different backend URL
+const API_BASE_URL = 'http://localhost:5000/api'; // Update if using a different backend URL
 
 // Generic request function
 const request = async (endpoint, method, data = null) => {

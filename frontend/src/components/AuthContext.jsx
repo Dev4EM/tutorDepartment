@@ -5,12 +5,13 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true); // 👈 add loading state
 
   // Load user & token from localStorage on mount
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('user');
-      const savedToken = localStorage.getItem('token'); // ✅ changed to match rest of app
+      const savedToken = localStorage.getItem('token');
 
       if (savedUser && savedToken) {
         setUser(JSON.parse(savedUser));
@@ -18,7 +19,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error loading user from localStorage:', error);
-      localStorage.clear(); // Prevent app crash if corrupted storage
+      localStorage.clear(); // Prevent crash if corrupted
+    } finally {
+      setLoading(false); // 👈 Mark loading complete
     }
   }, []);
 
@@ -35,6 +38,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   };
+
+  // ⏳ Prevent routes from rendering until user state is known
+  if (loading) return <div>Loading...</div>;
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
