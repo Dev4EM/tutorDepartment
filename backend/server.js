@@ -24,6 +24,9 @@ app.use('/api/curriculum',curriculumRoutes);
 app.use('/api/programs',Program);
 app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
+app.get('/', (req, res) => {
+  res.send('✅ Tutor Dashboard is running');
+});
 // MongoDB connection
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI ;
