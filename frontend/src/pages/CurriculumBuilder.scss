@@ -1,0 +1,138 @@
+.curriculum-page {
+  padding: 20px;
+  max-width: 100%;
+  margin: auto;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; // makes the whole page scrollable like an app
+
+  .title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+
+    .title-input {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      flex: 1 1 250px;
+    }
+
+    .btn-primary, .btn-secondary, .btn-toggle, .btn-export {
+      padding: 8px 15px;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary { background: #4caf50; color: white; }
+    .btn-primary:hover { background: #45a049; }
+
+    .btn-secondary { background: #2196f3; color: white; }
+    .btn-secondary:hover { background: #1976d2; }
+
+    .btn-toggle { background: #ff9800; color: white; }
+    .btn-toggle:hover { background: #fb8c00; }
+
+    .btn-export { background: #9c27b0; color: white; }
+    .btn-export:hover { background: #7b1fa2; }
+  }
+
+  .table-container {
+    flex: 1; // fill remaining vertical space
+    overflow: auto; // allow scrolling in both directions
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    position: relative;
+
+    .tableData {
+    //   width: max-content; // allows horizontal scrolling if needed
+      min-width: 100%;
+      width: 200%;
+      overflow: scroll;
+    //   border-collapse: collapse;
+
+      th, td {
+        width: 150px; // fixed cell width
+        height: 160px; // fixed height like Excel cells
+        text-align: center;
+        vertical-align: top;
+        border: 1px solid #e0e0e0;
+        padding: 10px;
+        overflow: hidden;
+        word-wrap: break-word;
+        background: #fff;
+      }
+
+      th {
+        background: #eef1f5;
+        color: #2c3e50;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      tr:nth-child(even) td {
+        background: #f7f7f7;
+      }
+
+     textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+  overflow-y: auto;
+  white-space: pre-wrap; // keeps formatting & line breaks
+}
+
+      .remove-col, .btn-delete {
+        background: none;
+        border: none;
+        color: red;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      .empty-msg {
+        padding: 20px;
+        color: #777;
+      }
+    }
+  }
+}
+.btn-save {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-save:hover {
+  background-color: #218838;
+}
