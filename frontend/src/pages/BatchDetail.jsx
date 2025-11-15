@@ -146,115 +146,130 @@ const BatchDetail = () => {
 
   // ================= Optimistic Update Handlers ===================
 
-  const handleCellToggle = (batch, type, rowIndex, colIndex) => {
-    const key = `${rowIndex}-${colIndex}`;
-    let updatedActivities =
-      batch.activitiesDoneByType?.[type]
-        ? [...batch.activitiesDoneByType[type]]
-        : [];
+const handleCellToggle = (batch, type, rowIndex, colIndex) => {
+  const key = `${rowIndex}-${colIndex}`;
+  let updatedActivities =
+    batch.activitiesDoneByType?.[type]
+      ? [...batch.activitiesDoneByType[type]]
+      : [];
 
-    if (updatedActivities.includes(key)) {
-      updatedActivities = updatedActivities.filter((k) => k !== key);
-    } else {
-      updatedActivities.push(key);
-    }
+  if (updatedActivities.includes(key)) {
+    updatedActivities = updatedActivities.filter((k) => k !== key);
+  } else {
+    updatedActivities.push(key);
+  }
 
-    const totalRows = batch.curriculum.rows.filter(
-      (row) => row["BASIC PACKAGE"] === type
-    ).length;
-    const totalCols =
-      Object.keys(
-        batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type)
-      ).length - 1;
+  const totalRows = batch.curriculum.rows.filter(
+    (row) => row["BASIC PACKAGE"] === type
+  ).length;
+  const totalCols =
+    Object.keys(batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type))
+      .length - 1;
 
-    const progress = Math.round(
-      (updatedActivities.length / (totalRows * totalCols)) * 100
-    );
+  const progress = Math.round(
+    (updatedActivities.length / (totalRows * totalCols)) * 100
+  );
 
-    // 🔹 Optimistic UI update
-    setBatches((prev) =>
-      prev.map((b) =>
-        b._id === batch._id
-          ? {
-              ...b,
-              activitiesDoneByType: {
-                ...b.activitiesDoneByType,
-                [type]: updatedActivities,
-              },
-              progressByType: {
-                ...b.progressByType,
-                [type]: progress,
-              },
-            }
-          : b
-      )
-    );
-
-    // 🔹 Background update (no delay)
-    updateBatch(batch._id, {
-      [`activitiesDoneByType.${type}`]: updatedActivities,
-      [`progressByType.${type}`]: progress,
-    }).catch((err) => {
-      console.error(err);
-      toast.error("Failed to update batch progress");
-      fetchBatches(); // fallback refresh if error
-    });
+  const updatedBatch = {
+    ...batch,
+    activitiesDoneByType: {
+      ...batch.activitiesDoneByType,
+      [type]: updatedActivities,
+    },
+    progressByType: {
+      ...batch.progressByType,
+      [type]: progress,
+    },
   };
 
-  const handleRowToggle = (batch, type, rowIndex) => {
-    const totalCols = Object.keys(
-      batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type)
-    ).length - 1;
+  // 🔹 Update batches array
+  setBatches((prev) =>
+    prev.map((b) => (b._id === batch._id ? updatedBatch : b))
+  );
 
-    let updatedActivities =
-      batch.activitiesDoneByType?.[type]
-        ? [...batch.activitiesDoneByType[type]]
-        : [];
+  // 🔹 Update selectedBatch if currently selected
+  if (selectedBatch?._id === batch._id) {
+    setSelectedBatch(updatedBatch);
+  }
 
-    const rowKeys = Array.from({ length: totalCols }, (_, i) => `${rowIndex}-${i}`);
-    const isChecked = rowKeys.every((k) => updatedActivities.includes(k));
+  // 🔹 Background update
+  updateBatch(batch._id, {
+    [`activitiesDoneByType.${type}`]: updatedActivities,
+    [`progressByType.${type}`]: progress,
+  }).catch((err) => {
+    console.error(err);
+    toast.error("Failed to update batch progress");
+    fetchBatches(); // fallback
+  });
+};
 
-    if (isChecked) {
-      updatedActivities = updatedActivities.filter((k) => !rowKeys.includes(k));
-    } else {
-      updatedActivities = Array.from(new Set([...updatedActivities, ...rowKeys]));
-    }
 
-    const totalRows = batch.curriculum.rows.filter(
-      (r) => r["BASIC PACKAGE"] === type
-    ).length;
-    const progress = Math.round(
-      (updatedActivities.length / (totalRows * totalCols)) * 100
-    );
+const handleRowToggle = (batch, type, rowIndex) => {
+  const totalCols = Object.keys(
+    batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type)
+  ).length - 1;
 
-    // 🔹 Optimistic UI update
-    setBatches((prev) =>
-      prev.map((b) =>
-        b._id === batch._id
-          ? {
-              ...b,
-              activitiesDoneByType: {
-                ...b.activitiesDoneByType,
-                [type]: updatedActivities,
-              },
-              progressByType: {
-                ...b.progressByType,
-                [type]: progress,
-              },
-            }
-          : b
-      )
-    );
+  let updatedActivities =
+    batch.activitiesDoneByType?.[type] ? [...batch.activitiesDoneByType[type]] : [];
 
-    updateBatch(batch._id, {
-      [`activitiesDoneByType.${type}`]: updatedActivities,
-      [`progressByType.${type}`]: progress,
-    }).catch((err) => {
-      console.error(err);
-      toast.error("Failed to update batch progress");
-      fetchBatches();
-    });
-  };
+  const rowKeys = Array.from({ length: totalCols }, (_, i) => `${rowIndex}-${i}`);
+  const isChecked = rowKeys.every((k) => updatedActivities.includes(k));
+
+  if (isChecked) {
+    updatedActivities = updatedActivities.filter((k) => !rowKeys.includes(k));
+  } else {
+    updatedActivities = Array.from(new Set([...updatedActivities, ...rowKeys]));
+  }
+
+  const totalRows = batch.curriculum.rows.filter((r) => r["BASIC PACKAGE"] === type).length;
+  const progress = Math.round((updatedActivities.length / (totalRows * totalCols)) * 100);
+
+  // Update batches
+  setBatches((prev) =>
+    prev.map((b) =>
+      b._id === batch._id
+        ? {
+            ...b,
+            activitiesDoneByType: {
+              ...b.activitiesDoneByType,
+              [type]: updatedActivities,
+            },
+            progressByType: {
+              ...b.progressByType,
+              [type]: progress,
+            },
+          }
+        : b
+    )
+  );
+
+  // Update selectedBatch
+  if (selectedBatch?._id === batch._id) {
+    setSelectedBatch((prev) => ({
+      ...prev,
+      activitiesDoneByType: {
+        ...prev.activitiesDoneByType,
+        [type]: updatedActivities,
+      },
+      progressByType: {
+        ...prev.progressByType,
+        [type]: progress,
+      },
+    }));
+  }
+
+  // API update
+  updateBatch(batch._id, {
+    [`activitiesDoneByType.${type}`]: updatedActivities,
+    [`progressByType.${type}`]: progress,
+  }).catch((err) => {
+    console.error(err);
+    toast.error("Failed to update batch progress");
+    fetchBatches();
+  });
+};
+
+
 
   const handleCompleteSubBatch = async (batch, currentType) => {
     const order = ["Basic", "Plus", "Pro"];
