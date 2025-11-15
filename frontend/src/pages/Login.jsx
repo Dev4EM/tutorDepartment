@@ -1,26 +1,26 @@
-import React, { useState,useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../api';
 import AuthContext from '../components/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-  const [email, setEmail] = useState(''); 
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useContext(AuthContext);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     try {
       const response = await loginUser({ workEmail: email, password });
       const { token, user } = response;
 
-      // ✅ Save token & user in localStorage
- login({ token, user });
- 
-      // Redirect to dashboard
+      login({ token, user });
+
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -28,37 +28,61 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex items-center justify-center" style={{
-        backgroundImage: `url('./images/tutorBg.png')`,
-        backgroundSize: 'contain',
+    <div
+      className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
+      style={{
+        backgroundImage: `url('./images/homePageImg.png')`,
+        backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'left',
-      }}>
-      <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+
+      {/* Login Card */}
+      <div className="relative z-10 bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl p-10 rounded-2xl w-full max-w-md text-white">
+
+        <h2 className="text-3xl font-bold text-center mb-6 drop-shadow-lg">
+          Tutor Portal Login
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* Email Field */}
           <div>
-            <label className="block text-gray-700 mb-1">Email:</label>
+            <label className="block mb-1 text-gray-200">Work Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/30 focus:ring-2 focus:ring-yellow-400 focus:outline-none placeholder-gray-300"
+              placeholder="Enter your email"
             />
           </div>
+
+          {/* Password Field */}
           <div>
-            <label className="block text-gray-700 mb-1">Password:</label>
+            <label className="block mb-1 text-gray-200">Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/30 focus:ring-2 focus:ring-yellow-400 focus:outline-none placeholder-gray-300"
+              placeholder="Enter your password"
             />
           </div>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+
+          {/* Error */}
+          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-yellow-500 text-black py-2 rounded-full font-semibold shadow-lg hover:bg-yellow-400 hover:scale-105 transition-all"
+          >
             Login
           </button>
         </form>
