@@ -11,7 +11,6 @@ import {
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
-import useUserAuthStore from "../stores/userAuthStore";
 
 // ================= Progress Circle ===================
 const ProgressCircle = ({ percentage }) => {
@@ -63,11 +62,7 @@ const BatchDetail = () => {
   const [tutors, setTutors] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const user =localStorage.getItem('user')
-  const { id: projectId } = useParams();
-
   const [batchForm, setBatchForm] = useState({
     name: "",
     curriculum: "",
@@ -75,6 +70,9 @@ const BatchDetail = () => {
     startDate: "",
     endDate: "",
   });
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { id: projectId } = useParams();
 
   useEffect(() => {
     fetchBatches();
@@ -87,7 +85,7 @@ const BatchDetail = () => {
       const data = await getCurriculumsById(curriculumId);
       return data;
     } catch (err) {
-      console.error("Error fetching curriculum:", err);
+      console.error(err);
       toast.error("Failed to fetch curriculum");
       return null;
     }
@@ -109,7 +107,7 @@ const BatchDetail = () => {
       );
 
       setBatches(batchesWithCurriculum);
-    } catch (err) { 
+    } catch (err) {
       console.error(err);
       toast.error("Failed to fetch batches");
     }
@@ -145,131 +143,121 @@ const BatchDetail = () => {
   };
 
   // ================= Optimistic Update Handlers ===================
+  const handleCellToggle = (batch, type, rowIndex, colIndex) => {
+    const key = `${rowIndex}-${colIndex}`;
+    let updatedActivities =
+      batch.activitiesDoneByType?.[type]
+        ? [...batch.activitiesDoneByType[type]]
+        : [];
 
-const handleCellToggle = (batch, type, rowIndex, colIndex) => {
-  const key = `${rowIndex}-${colIndex}`;
-  let updatedActivities =
-    batch.activitiesDoneByType?.[type]
-      ? [...batch.activitiesDoneByType[type]]
-      : [];
+    if (updatedActivities.includes(key)) {
+      updatedActivities = updatedActivities.filter((k) => k !== key);
+    } else {
+      updatedActivities.push(key);
+    }
 
-  if (updatedActivities.includes(key)) {
-    updatedActivities = updatedActivities.filter((k) => k !== key);
-  } else {
-    updatedActivities.push(key);
-  }
+    const totalRows = batch.curriculum.rows.filter(
+      (row) => row["BASIC PACKAGE"] === type
+    ).length;
+    const totalCols =
+      Object.keys(batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type))
+        .length - 1;
 
-  const totalRows = batch.curriculum.rows.filter(
-    (row) => row["BASIC PACKAGE"] === type
-  ).length;
-  const totalCols =
-    Object.keys(batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type))
-      .length - 1;
+    const progress = Math.round(
+      (updatedActivities.length / (totalRows * totalCols)) * 100
+    );
 
-  const progress = Math.round(
-    (updatedActivities.length / (totalRows * totalCols)) * 100
-  );
-
-  const updatedBatch = {
-    ...batch,
-    activitiesDoneByType: {
-      ...batch.activitiesDoneByType,
-      [type]: updatedActivities,
-    },
-    progressByType: {
-      ...batch.progressByType,
-      [type]: progress,
-    },
-  };
-
-  // 🔹 Update batches array
-  setBatches((prev) =>
-    prev.map((b) => (b._id === batch._id ? updatedBatch : b))
-  );
-
-  // 🔹 Update selectedBatch if currently selected
-  if (selectedBatch?._id === batch._id) {
-    setSelectedBatch(updatedBatch);
-  }
-
-  // 🔹 Background update
-  updateBatch(batch._id, {
-    [`activitiesDoneByType.${type}`]: updatedActivities,
-    [`progressByType.${type}`]: progress,
-  }).catch((err) => {
-    console.error(err);
-    toast.error("Failed to update batch progress");
-    fetchBatches(); // fallback
-  });
-};
-
-
-const handleRowToggle = (batch, type, rowIndex) => {
-  const totalCols = Object.keys(
-    batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type)
-  ).length - 1;
-
-  let updatedActivities =
-    batch.activitiesDoneByType?.[type] ? [...batch.activitiesDoneByType[type]] : [];
-
-  const rowKeys = Array.from({ length: totalCols }, (_, i) => `${rowIndex}-${i}`);
-  const isChecked = rowKeys.every((k) => updatedActivities.includes(k));
-
-  if (isChecked) {
-    updatedActivities = updatedActivities.filter((k) => !rowKeys.includes(k));
-  } else {
-    updatedActivities = Array.from(new Set([...updatedActivities, ...rowKeys]));
-  }
-
-  const totalRows = batch.curriculum.rows.filter((r) => r["BASIC PACKAGE"] === type).length;
-  const progress = Math.round((updatedActivities.length / (totalRows * totalCols)) * 100);
-
-  // Update batches
-  setBatches((prev) =>
-    prev.map((b) =>
-      b._id === batch._id
-        ? {
-            ...b,
-            activitiesDoneByType: {
-              ...b.activitiesDoneByType,
-              [type]: updatedActivities,
-            },
-            progressByType: {
-              ...b.progressByType,
-              [type]: progress,
-            },
-          }
-        : b
-    )
-  );
-
-  // Update selectedBatch
-  if (selectedBatch?._id === batch._id) {
-    setSelectedBatch((prev) => ({
-      ...prev,
+    const updatedBatch = {
+      ...batch,
       activitiesDoneByType: {
-        ...prev.activitiesDoneByType,
+        ...batch.activitiesDoneByType,
         [type]: updatedActivities,
       },
       progressByType: {
-        ...prev.progressByType,
+        ...batch.progressByType,
         [type]: progress,
       },
-    }));
-  }
+    };
 
-  // API update
-  updateBatch(batch._id, {
-    [`activitiesDoneByType.${type}`]: updatedActivities,
-    [`progressByType.${type}`]: progress,
-  }).catch((err) => {
-    console.error(err);
-    toast.error("Failed to update batch progress");
-    fetchBatches();
-  });
-};
+    setBatches((prev) =>
+      prev.map((b) => (b._id === batch._id ? updatedBatch : b))
+    );
 
+    if (selectedBatch?._id === batch._id) {
+      setSelectedBatch(updatedBatch);
+    }
 
+    updateBatch(batch._id, {
+      [`activitiesDoneByType.${type}`]: updatedActivities,
+      [`progressByType.${type}`]: progress,
+    }).catch((err) => {
+      console.error(err);
+      toast.error("Failed to update batch progress");
+      fetchBatches();
+    });
+  };
+
+  const handleRowToggle = (batch, type, rowIndex) => {
+    const totalCols = Object.keys(
+      batch.curriculum.rows.find((r) => r["BASIC PACKAGE"] === type)
+    ).length - 1;
+
+    let updatedActivities =
+      batch.activitiesDoneByType?.[type] ? [...batch.activitiesDoneByType[type]] : [];
+
+    const rowKeys = Array.from({ length: totalCols }, (_, i) => `${rowIndex}-${i}`);
+    const isChecked = rowKeys.every((k) => updatedActivities.includes(k));
+
+    if (isChecked) {
+      updatedActivities = updatedActivities.filter((k) => !rowKeys.includes(k));
+    } else {
+      updatedActivities = Array.from(new Set([...updatedActivities, ...rowKeys]));
+    }
+
+    const totalRows = batch.curriculum.rows.filter((r) => r["BASIC PACKAGE"] === type).length;
+    const progress = Math.round((updatedActivities.length / (totalRows * totalCols)) * 100);
+
+    setBatches((prev) =>
+      prev.map((b) =>
+        b._id === batch._id
+          ? {
+              ...b,
+              activitiesDoneByType: {
+                ...b.activitiesDoneByType,
+                [type]: updatedActivities,
+              },
+              progressByType: {
+                ...b.progressByType,
+                [type]: progress,
+              },
+            }
+          : b
+      )
+    );
+
+    if (selectedBatch?._id === batch._id) {
+      setSelectedBatch((prev) => ({
+        ...prev,
+        activitiesDoneByType: {
+          ...prev.activitiesDoneByType,
+          [type]: updatedActivities,
+        },
+        progressByType: {
+          ...prev.progressByType,
+          [type]: progress,
+        },
+      }));
+    }
+
+    updateBatch(batch._id, {
+      [`activitiesDoneByType.${type}`]: updatedActivities,
+      [`progressByType.${type}`]: progress,
+    }).catch((err) => {
+      console.error(err);
+      toast.error("Failed to update batch progress");
+      fetchBatches();
+    });
+  };
 
   const handleCompleteSubBatch = async (batch, currentType) => {
     const order = ["Basic", "Plus", "Pro"];
@@ -289,40 +277,32 @@ const handleRowToggle = (batch, type, rowIndex) => {
   };
 
   // ================= Create / Delete ===================
+  const handleBatchSubmit = async () => {
+    if (!batchForm.name || !batchForm.curriculum || !batchForm.tutor) {
+      return toast.error("Please fill all fields");
+    }
 
-const handleBatchSubmit = async () => {
-  if (!batchForm.name || !batchForm.curriculum || !batchForm.tutor) {
-    return toast.error("Please fill all fields");
-  }
+    if (isEditMode && selectedBatch) {
+      const updatedBatchData = { ...batchForm };
+      await updateBatch(selectedBatch._id, updatedBatchData);
+      toast.success("✅ Batch updated!");
+    } else {
+      const batchData = {
+        ...batchForm,
+        project: projectId,
+        activitiesDoneByType: { Basic: [], Plus: [], Pro: [] },
+        progressByType: { Basic: 0, Plus: 0, Pro: 0 },
+        unlockedPackages: ["Basic"],
+      };
+      await createBatch(batchData);
+      toast.success("✅ New Batch Created!");
+    }
 
-  if (isEditMode && selectedBatch) {
-    // Update batch
-    const updatedBatchData = {
-      ...batchForm,
-    };
-
-    await updateBatch(selectedBatch._id, updatedBatchData);
-    toast.success("✅ Batch updated!");
-  } else {
-    // Create batch
-    const batchData = {
-      ...batchForm,
-      project: projectId,
-      activitiesDoneByType: { Basic: [], Plus: [], Pro: [] },
-      progressByType: { Basic: 0, Plus: 0, Pro: 0 },
-      unlockedPackages: ["Basic"],
-    };
-
-    await createBatch(batchData);
-    toast.success("✅ New Batch Created!");
-  }
-
-  setIsBatchModalOpen(false);
-  setBatchForm({ name: "", curriculum: "", tutor: "", startDate: "", endDate: "" });
-  setIsEditMode(false);
-  fetchBatches();
-};
-
+    setIsBatchModalOpen(false);
+    setBatchForm({ name: "", curriculum: "", tutor: "", startDate: "", endDate: "" });
+    setIsEditMode(false);
+    fetchBatches();
+  };
 
   const handleDeleteBatch = async (batchId) => {
     if (window.confirm("Are you sure you want to delete this batch?")) {
@@ -335,6 +315,7 @@ const handleBatchSubmit = async () => {
   // ================= Render ===================
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {/* ===== Header ===== */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Batch Progress Tracker</h1>
         <button
@@ -345,35 +326,38 @@ const handleBatchSubmit = async () => {
         </button>
       </div>
 
-      {/* Batch Cards */}
+      {/* ===== Batch Cards ===== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {batches.map((batch) => (
           <div
             key={batch._id}
-              onClick={() => setSelectedBatch(batch)}
-            className="bg-white rounded-xl shadow-lg p-5 hover:shadow-2xl transition duration-300 relative"
+            onClick={() => setSelectedBatch(batch)}
+            className="bg-white rounded-xl shadow-lg p-5 hover:shadow-2xl transition duration-300 relative cursor-pointer transform hover:-translate-y-1"
           >
             <div className="absolute top-3 right-3 flex gap-2">
-             <button
-  onClick={() => {
-    setSelectedBatch(batch);
-    setBatchForm({
-      name: batch.name,
-      curriculum: batch.curriculum?._id || "",
-      tutor: batch.tutor?._id || "",
-      startDate: batch.startDate?.split("T")[0] || "",
-      endDate: batch.endDate?.split("T")[0] || "",
-    });
-    setIsBatchModalOpen(true);
-    setIsEditMode(true);
-  }}
-  className="text-blue-600 hover:text-blue-800"
->
-  <FaEdit />
-</button>
-
               <button
-                onClick={() => handleDeleteBatch(batch._id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedBatch(batch);
+                  setBatchForm({
+                    name: batch.name,
+                    curriculum: batch.curriculum?._id || "",
+                    tutor: batch.tutor?._id || "",
+                    startDate: batch.startDate?.split("T")[0] || "",
+                    endDate: batch.endDate?.split("T")[0] || "",
+                  });
+                  setIsBatchModalOpen(true);
+                  setIsEditMode(true);
+                }}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <FaEdit />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteBatch(batch._id);
+                }}
                 className="text-red-600 hover:text-red-800"
               >
                 <FaTrash />
@@ -384,7 +368,6 @@ const handleBatchSubmit = async () => {
             <div className="flex justify-around mt-3">
               {["Basic", "Plus", "Pro"].map((type) => {
                 if (!batch.unlockedPackages?.includes(type)) return null;
-
                 const progress = batch.progressByType?.[type] || 0;
                 return (
                   <div key={type} className="text-center">
@@ -398,7 +381,7 @@ const handleBatchSubmit = async () => {
         ))}
       </div>
 
-      {/* Selected Batch Details */}
+      {/* ===== Selected Batch Details ===== */}
       {selectedBatch && (
         <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-4">
@@ -424,7 +407,7 @@ const handleBatchSubmit = async () => {
                 <h3 className="text-xl font-semibold mb-2">{type} Package</h3>
 
                 {subRows.length === 0 ? (
-                  <p>No curriculum data available.</p>
+                  <p className="text-gray-500">No curriculum data available.</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="border border-gray-200 bg-white rounded-lg shadow-sm w-full">
@@ -440,12 +423,14 @@ const handleBatchSubmit = async () => {
                       </thead>
                       <tbody>
                         {subRows.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
+                          <tr key={rowIndex} className="hover:bg-gray-50 transition">
                             {selectedBatch.curriculum.columns.map((col, colIndex) => (
                               <td key={colIndex} className="px-4 py-2 border-b">
                                 <div className="flex items-center gap-2">
                                   <span>{row[col]}</span>
-                                  {col !== "BASIC PACKAGE" && (
+
+                                  {/* ✅ Only show checkbox if there is data */}
+                                  {col !== "BASIC PACKAGE" && row[col] && (
                                     <input
                                       type="checkbox"
                                       checked={
@@ -463,12 +448,10 @@ const handleBatchSubmit = async () => {
                               </td>
                             ))}
 
-                            {/* ✅ Hide tick if row has no actual data */}
                             <td className="px-4 py-2 text-center border-b">
                               {Object.values(row).some(
                                 (val, idx) =>
-                                  val &&
-                                  selectedBatch.curriculum.columns[idx] !== "BASIC PACKAGE"
+                                  val && selectedBatch.curriculum.columns[idx] !== "BASIC PACKAGE"
                               ) && (
                                 <input
                                   type="checkbox"
@@ -476,8 +459,7 @@ const handleBatchSubmit = async () => {
                                   checked={isRowFullyChecked(
                                     {
                                       curriculumRows: subRows,
-                                      activitiesDone:
-                                        selectedBatch.activitiesDoneByType?.[type],
+                                      activitiesDone: selectedBatch.activitiesDoneByType?.[type],
                                     },
                                     rowIndex
                                   )}
@@ -494,48 +476,42 @@ const handleBatchSubmit = async () => {
                   </div>
                 )}
 
-                {(user.userType === "admin" || user.userType === "teamLeader") && (
-                  <>
-                    {selectedBatch.progressByType?.[type] === 100 && type !== "Pro" && (
-                      <button
-                        onClick={() => handleCompleteSubBatch(selectedBatch, type)}
-                        className="mt-3 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-                      >
-                        Proceed to Next Package
-                      </button>
-                    )}
-                  </>
-                )}
+                {(user.userType === "admin" || user.userType === "teamLeader") &&
+                  selectedBatch.progressByType?.[type] === 100 &&
+                  type !== "Pro" && (
+                    <button
+                      onClick={() => handleCompleteSubBatch(selectedBatch, type)}
+                      className="mt-3 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Proceed to Next Package
+                    </button>
+                  )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* ================= Create Batch Modal =================== */}
+      {/* ===== Batch Modal ===== */}
       {isBatchModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg animate-slideIn">
             <h2 className="text-xl font-semibold mb-4">
-  {isEditMode ? "Edit Batch Details" : "Create New Batch"}
-</h2>
+              {isEditMode ? "Edit Batch Details" : "Create New Batch"}
+            </h2>
 
             <input
               type="text"
               placeholder="Batch Name"
-              className="w-full border px-3 py-2 rounded mb-2"
+              className="w-full border px-3 py-2 rounded mb-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
               value={batchForm.name}
-              onChange={(e) =>
-                setBatchForm({ ...batchForm, name: e.target.value })
-              }
+              onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
             />
 
             <select
-              className="w-full border px-3 py-2 rounded mb-2"
+              className="w-full border px-3 py-2 rounded mb-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
               value={batchForm.curriculum}
-              onChange={(e) =>
-                setBatchForm({ ...batchForm, curriculum: e.target.value })
-              }
+              onChange={(e) => setBatchForm({ ...batchForm, curriculum: e.target.value })}
             >
               <option value="">Select Curriculum</option>
               {curriculums.map((c) => (
@@ -546,11 +522,9 @@ const handleBatchSubmit = async () => {
             </select>
 
             <select
-              className="w-full border px-3 py-2 rounded mb-2"
+              className="w-full border px-3 py-2 rounded mb-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
               value={batchForm.tutor}
-              onChange={(e) =>
-                setBatchForm({ ...batchForm, tutor: e.target.value })
-              }
+              onChange={(e) => setBatchForm({ ...batchForm, tutor: e.target.value })}
             >
               <option value="">Select Tutor</option>
               {tutors.map((t) => (
@@ -560,41 +534,38 @@ const handleBatchSubmit = async () => {
               ))}
             </select>
 
-            <input
-              type="date"
-              className="w-full border px-3 py-2 rounded mb-2"
-              value={batchForm.startDate}
-              onChange={(e) =>
-                setBatchForm({ ...batchForm, startDate: e.target.value })
-              }
-            />
-            <input
-              type="date"
-              className="w-full border px-3 py-2 rounded mb-2"
-              value={batchForm.endDate}
-              onChange={(e) =>
-                setBatchForm({ ...batchForm, endDate: e.target.value })
-              }
-            />
+            <div className="flex gap-2 mb-2">
+              <input
+                type="date"
+                className="w-1/2 border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                value={batchForm.startDate}
+                onChange={(e) => setBatchForm({ ...batchForm, startDate: e.target.value })}
+              />
+              <input
+                type="date"
+                className="w-1/2 border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                value={batchForm.endDate}
+                onChange={(e) => setBatchForm({ ...batchForm, endDate: e.target.value })}
+              />
+            </div>
 
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setIsBatchModalOpen(false)}
-                className="border px-4 py-2 rounded hover:bg-gray-100"
+                className="px-4 py-2 border rounded hover:bg-gray-100"
               >
                 Cancel
               </button>
               <button
-  onClick={handleBatchSubmit}
-  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
->
-  {isEditMode ? "Update" : "Create"}
-</button>
+                onClick={handleBatchSubmit}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                {isEditMode ? "Update" : "Create"}
+              </button>
             </div>
           </div>
         </div>
       )}
-   
     </div>
   );
 };
