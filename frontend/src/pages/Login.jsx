@@ -38,7 +38,7 @@ const Login = () => {
       }}
     >
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"></div>
 
       {/* Login Card */}
       <div className="relative z-10 bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl p-10 rounded-2xl w-full max-w-md text-white">

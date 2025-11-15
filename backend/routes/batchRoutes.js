@@ -33,7 +33,7 @@ router.put('/:id', async (req, res) => {
     const batch = await Batch.findById(req.params.id);
     if (!batch) return res.status(404).json({ message: 'Batch not found' });
 
-    // ✅ Handle tutor change and track history
+    // ========== TUTOR HISTORY ==========
     if (req.body.tutor && req.body.tutor.toString() !== batch.tutor?.toString()) {
       if (batch.tutor) {
         batch.tutorHistory.push({ tutor: batch.tutor });
@@ -41,8 +41,18 @@ router.put('/:id', async (req, res) => {
       batch.tutor = req.body.tutor;
     }
 
-    // ✅ Dynamically update allowed fields
-    const updatableFields = [
+    // ========== NESTED FIELD UPDATES ==========
+    const updateObj = {};
+
+    Object.keys(req.body).forEach((key) => {
+      // If key contains a dot → nested field (e.g., activitiesDoneByType.Basic)
+      if (key.includes('.')) {
+        updateObj[key] = req.body[key];
+      }
+    });
+
+    // ========== DIRECT FIELD UPDATES ==========
+    const simpleFields = [
       'name',
       'curriculum',
       'project',
@@ -52,19 +62,20 @@ router.put('/:id', async (req, res) => {
       'progressByType',
       'unlockedPackages',
     ];
-    updatableFields.forEach((field) => {
+
+    simpleFields.forEach((field) => {
       if (req.body[field] !== undefined) {
-        batch[field] = req.body[field];
+        updateObj[field] = req.body[field];
       }
     });
 
-    const updatedBatch = await batch.save();
-
-    // ✅ Modern Mongoose populate (no execPopulate)
-    await updatedBatch.populate([
-      { path: 'tutor' },
-      { path: 'tutorHistory.tutor' },
-    ]);
+    const updatedBatch = await Batch.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateObj },
+      { new: true }
+    )
+      .populate('tutor')
+      .populate('tutorHistory.tutor');
 
     res.json(updatedBatch);
   } catch (err) {
@@ -72,6 +83,7 @@ router.put('/:id', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // 🧠 Delete batch
 router.delete('/:id', async (req, res) => {

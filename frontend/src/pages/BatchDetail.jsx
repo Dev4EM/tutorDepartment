@@ -109,7 +109,7 @@ const BatchDetail = () => {
       );
 
       setBatches(batchesWithCurriculum);
-    } catch (err) {
+    } catch (err) { 
       console.error(err);
       toast.error("Failed to fetch batches");
     }
