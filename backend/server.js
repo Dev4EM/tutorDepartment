@@ -9,7 +9,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/user');
 const batchRoutes=require('./routes/batchRoutes.js');
-
+const taskRoutes=require('./routes/taskRoutes.js');
 const app = express();
 const adminRoutes = require('./routes/adminRoutes');
 
@@ -24,6 +24,7 @@ app.use('/api/curriculum',curriculumRoutes);
 app.use('/api/programs',Program);
 app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
+app.use('/api/tasks', taskRoutes);
 app.get('/', (req, res) => {
   res.send('✅ Tutor Dashboard is running');
 });

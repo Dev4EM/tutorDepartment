@@ -7,7 +7,9 @@ const NewTutor = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+    const user = JSON.parse(localStorage.getItem("user"));
 
+  const userType = user?.userType;
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -62,12 +64,12 @@ const NewTutor = () => {
       {/* Header */}
       <div className="flex flex-row justify-between items-center mb-8">
         <h2 className="text-3xl font-extrabold text-gray-900">All Tutors</h2>
-        <button
+       {userType==='admin'&&(<button
           className="px-6 py-2 bg-indigo-700 hover:bg-indigo-800 rounded-full text-white font-semibold"
           onClick={() => setShowModal(true)}
         >
           Add New
-        </button>
+        </button>)} 
       </div>
 
       {/* Modal */}

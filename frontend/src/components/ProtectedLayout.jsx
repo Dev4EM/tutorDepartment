@@ -6,7 +6,6 @@ const ProtectedLayout = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // ✅ Load user data from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {

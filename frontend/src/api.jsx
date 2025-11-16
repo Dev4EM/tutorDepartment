@@ -1,6 +1,7 @@
 import useUserAuthStore from "./stores/userAuthStore";
 
 const API_BASE_URL = 'https://api.tutor.esromagica.in/api'; // Update if using a different backend URL
+// const API_BASE_URL = 'http://localhost:5000/api'; // Update if using a different backend URL
 
 // Generic request function
 const request = async (endpoint, method, data = null) => {
@@ -149,4 +150,14 @@ export const createProgram = async (programData) => {
 };
 export const getAllAlerts = async () => {
   return request('/admin/alerts', 'GET');
+};
+export const createTaskForMe = async (programData) => {
+  return request('/task', 'POST', programData);
+};
+export const updateTask = async (taskId, status) => {
+  return request(`/tasks/${taskId}/status`, 'PATCH', { status });
+};
+
+export const deleteTask = async (taskId) => {
+  return request(`/tasks/${taskId}`, 'DELETE');
 };

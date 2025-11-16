@@ -11,6 +11,9 @@ import { FaChalkboardTeacher } from "react-icons/fa";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 const Sidebar = () => {
   const { pathname } = useLocation();
+   const user = JSON.parse(localStorage.getItem("user"));
+
+  const userType = user?.userType;
 
   const linkClasses = (path) =>
     `block px-4 py-2 rounded hover:bg-blue-100 w-full rounded-full flex flex-col items-start  transition ${
@@ -27,7 +30,7 @@ const Sidebar = () => {
         <Link to="/add-sheet" className={linkClasses('/add-sheet')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><LuSheet className='mr-2 text-2xl'/> Add Sheet Links</Link>
         {/* <Link to="/assign-task" className={linkClasses('/assign-task')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><GoTasklist className='mr-2 text-2xl'/> Assign Tasks</Link> */}
         <Link to="/curr-activity" className={linkClasses('/curr-activity')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><VscLayersActive className='mr-2 text-2xl'/> Curriculum Activity</Link>  
-        <Link to="/new-tutor" className={linkClasses('/new-tutor')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <FaChalkboardTeacher className='mr-2 text-2xl'/>Create New Tutor</Link>
+      {userType==='admin'&&(  <Link to="/new-tutor" className={linkClasses('/new-tutor')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <FaChalkboardTeacher className='mr-2 text-2xl'/>Create New Tutor</Link>)}
         <Link to="/logout" className={linkClasses('/logout')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <RiLogoutCircleRLine className='mr-2 text-2xl'/>Logout</Link>
       </nav>
     </div>

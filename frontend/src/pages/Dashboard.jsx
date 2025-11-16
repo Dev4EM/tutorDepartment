@@ -94,7 +94,7 @@ const Dashboard = () => {
       </div>
 
       {/* Sessions Section */}
-      <section className="mb-10">
+      {/* <section className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
           📅 Upcoming Sessions
         </h2>
@@ -107,10 +107,10 @@ const Dashboard = () => {
             <p className="text-gray-500 col-span-full">No upcoming sessions.</p>
           )}
         </div>
-      </section>
+      </section> */}
 
       {/* Tasks Section */}
-      <section className="mb-10">
+      {/* <section className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
           📝 Your Current Tasks
         </h2>
@@ -123,10 +123,10 @@ const Dashboard = () => {
             </p>
           )}
         </div>
-      </section>
+      </section> */}
 
       {/* Schedule Section */}
-      <section>
+      {/* <section>
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 PTM</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {schedule.length > 0 ? (
@@ -139,7 +139,7 @@ const Dashboard = () => {
             </p>
           )}
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };
