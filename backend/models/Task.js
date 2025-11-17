@@ -28,6 +28,12 @@ const taskSchema = new mongoose.Schema({
     required: true
   },
 
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true   // set to false if optional
+  },
+
   status: {
     type: String,
     enum: ['Pending', 'Incomplete', 'Complete'],

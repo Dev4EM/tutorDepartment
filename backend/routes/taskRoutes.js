@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task');
-const User = require('../models/User');
 
 // 🧠 Create a new task
 router.post('/', async (req, res) => {
   try {
-    const { title, description, url, dueDate, assignedTo } = req.body;
+    const { title, description, url, dueDate, assignedTo, createdBy } = req.body;
 
-    if (!title || !dueDate || !assignedTo) {
-      return res.status(400).json({ message: 'Title, dueDate, and assignedTo are required.' });
+    if (!title || !dueDate || !assignedTo || !createdBy) {
+      return res.status(400).json({ message: 'Title, dueDate, assignedTo, and createdBy are required.' });
     }
 
     const newTask = new Task({
@@ -18,6 +17,7 @@ router.post('/', async (req, res) => {
       url,
       dueDate,
       assignedTo,
+      createdBy
     });
 
     const savedTask = await newTask.save();
@@ -32,7 +32,10 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const tasks = await Task.find()
-      .populate('assignedTo', 'firstName lastName workEmail userType');
+      .select('title description url dueDate assignedTo createdAt createdBy status')
+      .populate('assignedTo', 'firstName lastName workEmail userType')
+      .populate('createdBy', 'firstName lastName workEmail userType');
+
     res.json(tasks);
   } catch (err) {
     console.error('Error fetching tasks:', err);
@@ -44,7 +47,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
-      .populate('assignedTo', 'firstName lastName workEmail userType');
+      .select('title description url dueDate assignedTo createdAt createdBy status')
+      .populate('assignedTo', 'firstName lastName workEmail userType')
+      .populate('createdBy', 'firstName lastName workEmail userType');
 
     if (!task) return res.status(404).json({ message: 'Task not found' });
 
@@ -55,16 +60,19 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 🧠 Update task (title, description, url, dueDate, assignedTo)
+// 🧠 Update task (title, description, url, dueDate, assignedTo, status)
 router.put('/:id', async (req, res) => {
   try {
-    const { title, description, url, dueDate, assignedTo, status } = req.body;
+    const { title, description, url, dueDate, assignedTo, status, createdBy } = req.body;
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      { title, description, url, dueDate, assignedTo, status },
+      { title, description, url, dueDate, assignedTo, status, createdBy },
       { new: true, runValidators: true }
-    ).populate('assignedTo', 'firstName lastName workEmail userType');
+    )
+      .select('title description url dueDate assignedTo createdAt createdBy status')
+      .populate('assignedTo', 'firstName lastName workEmail userType')
+      .populate('createdBy', 'firstName lastName workEmail userType');
 
     if (!updatedTask) return res.status(404).json({ message: 'Task not found' });
 
@@ -79,7 +87,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Task.findByIdAndDelete(req.params.id);
+
     if (!deleted) return res.status(404).json({ message: 'Task not found' });
+
     res.json({ message: 'Task deleted successfully' });
   } catch (err) {
     console.error('Error deleting task:', err);
@@ -87,7 +97,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// 🧠 Update task status only (Pending, Incomplete, Complete)
+// 🧠 Update task status only
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
@@ -100,7 +110,10 @@ router.patch('/:id/status', async (req, res) => {
       req.params.id,
       { status },
       { new: true }
-    ).populate('assignedTo', 'firstName lastName workEmail userType');
+    )
+      .select('title description url dueDate assignedTo createdAt createdBy status')
+      .populate('assignedTo', 'firstName lastName workEmail userType')
+      .populate('createdBy', 'firstName lastName workEmail userType');
 
     if (!updatedTask) return res.status(404).json({ message: 'Task not found' });
 

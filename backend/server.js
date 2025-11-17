@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const curriculumRoutes=require('./routes/curriculumRoutes.js');
 const Program = require('./routes/programRoutes.js');
+
 require('dotenv').config();
 
 // Import routes
@@ -10,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/user');
 const batchRoutes=require('./routes/batchRoutes.js');
 const taskRoutes=require('./routes/taskRoutes.js');
+const sheetRoutes=require('./routes/sheetRoutes.js');
 const app = express();
 const adminRoutes = require('./routes/adminRoutes');
 
@@ -25,6 +27,7 @@ app.use('/api/programs',Program);
 app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/sheets', sheetRoutes);
 app.get('/', (req, res) => {
   res.send('✅ Tutor Dashboard is running');
 });

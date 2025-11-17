@@ -158,6 +158,18 @@ export const updateTask = async (taskId, status) => {
   return request(`/tasks/${taskId}/status`, 'PATCH', { status });
 };
 
+export const updateSheet = async (sheetId, data) => {
+  return request(`/sheets/${sheetId}`, 'PUT', data);
+};
+export const createSheet = async (sheetData) => {
+  return request(`/sheets`, 'POST', sheetData);
+};
+export const deleteSheet = async (sheetId) => {
+  return request(`/sheets/${sheetId}`, 'DELETE');
+};
+export const getAllSheets = async () => {
+  return request(`/sheets`, 'GET');
+};
 export const deleteTask = async (taskId) => {
   return request(`/tasks/${taskId}`, 'DELETE');
 };

@@ -49,14 +49,24 @@ const TaskManager = () => {
   const handleCreateTask = async () => {
     let finalUserIds = formData.userIds;
     if (userType === "tutor") finalUserIds = [userId];
+
     if (!formData.title || !formData.dueDate || finalUserIds.length === 0) {
       alert("Title and Due Date required");
       return;
     }
+
     try {
       await Promise.all(
-        finalUserIds.map((uid) => assignTask({ ...formData, userId: uid }))
+        finalUserIds.map((uid) =>
+          assignTask({
+            ...formData,
+            userId: uid,
+            assignedTo: uid,
+            createdBy: userId, // ⭐ ADD CREATED BY
+          })
+        )
       );
+
       setFormData({ userIds: [], title: "", description: "", url: "", dueDate: "", group: "" });
       setShowModal(false);
       fetchTasks();
@@ -101,6 +111,7 @@ const TaskManager = () => {
     }
   };
 
+  // ⭐ Updated TaskCard to show createdBy + createdAt
   const TaskCard = ({ task }) => (
     <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-blue-500 flex flex-col gap-2 relative">
       <div className="flex justify-between items-start text-start">
@@ -109,14 +120,44 @@ const TaskManager = () => {
           <FaTrash className="text-red-500 cursor-pointer" onClick={() => handleDeleteTask(task._id)} />
         )}
       </div>
-      {task.group && <p className="text-sm text-gray-500 text-start">Group: {task.group}</p>}
-      {task.description && <p className="text-gray-700 text-start"><b>Task description</b>: {task.description}</p>}
+
+      {task.assignedTo && (
+        <p className="text-sm text-gray-500 text-start">
+          <b>Assigned To:</b> {task.assignedTo.firstName} {task.assignedTo.lastName}
+        </p>
+      )}
+
+      {task.createdBy && (
+        <p className="text-sm text-gray-500 text-start">
+          <b>Created By:</b> {task.createdBy.firstName} {task.createdBy.lastName}
+        </p>
+      )}
+
+      <p className="text-sm text-gray-400 text-start">
+        <b>Created At:</b> {new Date(task.createdAt).toLocaleString()}
+      </p>
+
+      {task.description && (
+        <p className="text-gray-700 text-start">
+          <b>Description:</b> {task.description}
+        </p>
+      )}
+
       {task.url && (
-        <a href={task.url} target="_blank" rel="noreferrer" className="text-blue-500 underline text-sm text-start">
+        <a
+          href={task.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-blue-500 underline text-sm text-start"
+        >
           Link
         </a>
       )}
-      <p className="text-sm text-gray-500 text-start">Due: {new Date(task.dueDate).toLocaleDateString()}</p>
+
+      <p className="text-sm text-gray-500 text-start">
+        <b>Due:</b> {new Date(task.dueDate).toLocaleDateString()}
+      </p>
+
       <select
         className={`mt-2 px-2 py-1 rounded ${getStatusClasses(task.status)}`}
         value={task.status}
@@ -172,15 +213,18 @@ const TaskManager = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-semibold mb-2">Create Task</h2>
-            
+
             {userType !== "tutor" && (
               <select multiple className="border rounded px-3 py-2" value={formData.userIds} onChange={handleUserSelect}>
                 <option value="all">Select All</option>
                 {users.map((u) => (
-                  <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>
+                  <option key={u._id} value={u._id}>
+                    {u.firstName} {u.lastName}
+                  </option>
                 ))}
               </select>
             )}
+
             <input
               type="text"
               placeholder="Title"
@@ -188,6 +232,7 @@ const TaskManager = () => {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             />
+
             <input
               type="text"
               placeholder="Description"
@@ -195,6 +240,7 @@ const TaskManager = () => {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
+
             <input
               type="text"
               placeholder="URL"
@@ -202,15 +248,21 @@ const TaskManager = () => {
               value={formData.url}
               onChange={(e) => setFormData({ ...formData, url: e.target.value })}
             />
+
             <input
               type="date"
               className="border rounded px-3 py-2"
               value={formData.dueDate}
               onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
             />
+
             <div className="flex justify-end gap-2 mt-2">
-              <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={handleCreateTask}>Save</button>
-              <button className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={handleCreateTask}>
+                Save
+              </button>
+              <button className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
