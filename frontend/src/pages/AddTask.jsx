@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { getAllUsers, getAllTask, assignTask, updateTask, deleteTask } from "../api";
+import { getAllUsers, getAllTask, createTaskForMe, updateTask, deleteTask } from "../api";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 const TaskManager = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
+  const userId1= user?.id;
   const userType = user?.userType;
 
   const [users, setUsers] = useState([]);
@@ -46,36 +47,51 @@ const TaskManager = () => {
     }
   };
 
-  const handleCreateTask = async () => {
-    let finalUserIds = formData.userIds;
-    if (userType === "tutor") finalUserIds = [userId];
+const handleCreateTask = async () => {
+  let finalUserIds = formData.userIds;
 
-    if (!formData.title || !formData.dueDate || finalUserIds.length === 0) {
-      alert("Title and Due Date required");
-      return;
-    }
+  if (userType === "tutor") finalUserIds = [userId];
 
-    try {
-      await Promise.all(
-        finalUserIds.map((uid) =>
-          assignTask({
-            ...formData,
-            userId: uid,
-            assignedTo: uid,
-            createdBy: userId, // ⭐ ADD CREATED BY
-          })
-        )
-      );
+  if (!formData.title || !formData.dueDate || finalUserIds.length === 0) {
+    alert("Title, Due Date and User required");
+    return;
+  }
 
-      setFormData({ userIds: [], title: "", description: "", url: "", dueDate: "", group: "" });
-      setShowModal(false);
-      fetchTasks();
-      toast.success("Task created successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create task");
-    }
-  };
+  try {
+   await Promise.all(
+  finalUserIds.map((uid) =>
+    createTaskForMe({
+      title: formData.title,
+      description: formData.description,
+      url: formData.url,
+      dueDate: formData.dueDate,
+
+      assignedTo: uid,   // REQUIRED
+      createdBy: userId, // REQUIRED
+    })
+  )
+);
+
+     
+
+    setFormData({
+      userIds: [],
+      title: "",
+      description: "",
+      url: "",
+      dueDate: "",
+      group: "",
+    });
+
+    setShowModal(false);
+    fetchTasks();
+    toast.success("Task created successfully!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to create task");
+  }
+};
+
 
   const handleStatusChange = async (taskId, status) => {
     try {
@@ -116,7 +132,7 @@ const TaskManager = () => {
     <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-blue-500 flex flex-col gap-2 relative">
       <div className="flex justify-between items-start text-start">
         <h3 className="font-semibold text-lg">{task.title}</h3>
-        {(userType === "admin" || userType === "teamLeader") && (
+        {(userType === "admin" || userType === "teamLeader"|| task.createdBy==userId) && (
           <FaTrash className="text-red-500 cursor-pointer" onClick={() => handleDeleteTask(task._id)} />
         )}
       </div>
@@ -127,12 +143,7 @@ const TaskManager = () => {
         </p>
       )}
 
-      {task.createdBy && (
-        <p className="text-sm text-gray-500 text-start">
-          <b>Created By:</b> {task.createdBy.firstName} {task.createdBy.lastName}
-        </p>
-      )}
-
+      
       <p className="text-sm text-gray-400 text-start">
         <b>Created At:</b> {new Date(task.createdAt).toLocaleString()}
       </p>

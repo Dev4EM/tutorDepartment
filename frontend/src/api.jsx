@@ -54,9 +54,9 @@ export const createUser = async (userData) => {
 };
 
 // Assign a task
-export const assignTask = async (taskData) => {
-  return request('/admin/tasks/assign', 'POST', taskData);
-};
+// export const assignTask = async (taskData) => {
+//   return request('/admin/tasks/assign', 'POST', taskData);
+// };
 export const getAllTask = async () => {
   return request('/admin/tasks', 'GET');
 };
@@ -152,7 +152,7 @@ export const getAllAlerts = async () => {
   return request('/admin/alerts', 'GET');
 };
 export const createTaskForMe = async (programData) => {
-  return request('/task', 'POST', programData);
+  return request('/tasks', 'POST', programData);
 };
 export const updateTask = async (taskId, status) => {
   return request(`/tasks/${taskId}/status`, 'PATCH', { status });
