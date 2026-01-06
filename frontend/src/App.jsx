@@ -23,6 +23,7 @@ import TutorDetails from './pages/TutorDetails';
 import SchedulePage from './pages/SchedulePage';
 import AccountSelectionPage from './pages/AccountSelectionPage';
 import AdminDashboard from './components/AdminDashboard';
+import ForgetPassword from './pages/ForgetPassword';
 
 
 // 🔐 Protect specific routes
@@ -55,6 +56,7 @@ function LayoutRoutes() {
         <Route path="edit-curr/:id" element={<ProtectedRoute><EditCurriculum /></ProtectedRoute>} />
         <Route path="batch/:id" element={<ProtectedRoute><BatchDetail /></ProtectedRoute>} />
         <Route path="tutordetails/:id" element={<ProtectedRoute><TutorDetails /></ProtectedRoute>} />
+        <Route path="tutor/forget-pass" element={<ProtectedRoute><ForgetPassword /></ProtectedRoute>} />
 
 {/* <Route  path="logout" element={  <ProtectedRoute>    <Logout />  </ProtectedRoute>  }/>   */}
 

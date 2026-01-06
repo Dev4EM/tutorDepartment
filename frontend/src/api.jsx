@@ -32,6 +32,14 @@ const request = async (endpoint, method, data = null) => {
 export const loginUser = async (credentials) => {
   return request('/users/login', 'POST', credentials);
 };
+export const forgetPassword = async (data) => {
+  return request('/users/forgot-password', 'POST', data);
+};
+export const googleLogin = async (googleToken) => {
+  return request('/users/google', 'POST', {
+    token: googleToken,
+  });
+};
 
 export const getTutorDashboard = async (credentials) => {
   return request('/users/login', 'POST', credentials); // Possibly a duplicate of loginUser
