@@ -4,6 +4,7 @@ import { getTutorDashboard, getAllUsers,getAllTask,getCurriculum } from '../api'
 import TaskCard from './TaskCard';
 import SessionCard from './SessionCard';
 import ScheduleCard from './ScheduleCard';
+import SchedulePage from './SchedulePage';
 
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
@@ -72,7 +73,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6 bg-white font-josefin rounded-md shadow min-h-screen">
+    <div className="py-4 bg-white font-josefin rounded-md shadow min-h-screen">
       <h1 className="text-4xl font-bold text-gray-800 mb-8">
         Welcome back, {user?.firstName || 'Tutor'}
       </h1>
@@ -92,7 +93,7 @@ const Dashboard = () => {
           <p className="text-3xl font-bold text-purple-600">{curriculumCount}</p>
         </div>
       </div>
-
+<SchedulePage/>
       {/* Sessions Section */}
       {/* <section className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">

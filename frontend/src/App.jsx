@@ -20,6 +20,9 @@ import "react-toastify/dist/ReactToastify.css";
 import EditCurriculum from './pages/EditCurriculum';
 import BatchDetail from './pages/BatchDetail';
 import TutorDetails from './pages/TutorDetails';
+import SchedulePage from './pages/SchedulePage';
+import AccountSelectionPage from './pages/AccountSelectionPage';
+import AdminDashboard from './components/AdminDashboard';
 
 
 // 🔐 Protect specific routes
@@ -37,28 +40,28 @@ function LayoutRoutes() {
       <Route path="/login" element={<Login />} />
 
       {/* Protected Routes - Nested under layout */}
-      <Route 
-      path="/" element={<ProtectedLayout />}>
-        <Route path="dashboard" element={ <ProtectedRoute> <Dashboard />  </ProtectedRoute> }/>
-        <Route path="daily-batch" element={ <ProtectedRoute> <DailyBatch />  </ProtectedRoute> }   />
-         <Route  path="add-task" element={  <ProtectedRoute>    <AddTask />  </ProtectedRoute>  }/>  
-        <Route  path="add-sheet" element={  <ProtectedRoute>    <AddSheet />  </ProtectedRoute>  }/>  
-        <Route  path="assign-task" element={  <ProtectedRoute>    <AssignTask />  </ProtectedRoute>  }/>  
-        <Route  path="curr-activity" element={  <ProtectedRoute>    <CurrActivity />  </ProtectedRoute>  }/>  
-        <Route  path="new-tutor" element={  <ProtectedRoute>    <NewTutor />  </ProtectedRoute>  }/> 
-        <Route  path="view-curr" element={  <ProtectedRoute>    <ViewCurr />  </ProtectedRoute>  }/> 
-        <Route  path="create-curr" element={  <ProtectedRoute>    <CreateCurriculum />  </ProtectedRoute>  }/> 
+      <Route path="/" element={<ProtectedLayout />}>
+        <Route path="dashboard" element={<ProtectedRoute> <Dashboard />  </ProtectedRoute>} />
+        <Route path="daily-batch" element={<ProtectedRoute> <DailyBatch />  </ProtectedRoute>} />
+        <Route path="add-task" element={<ProtectedRoute>    <AddTask />  </ProtectedRoute>} />
+        <Route path="add-schedule" element={<ProtectedRoute>    <SchedulePage />  </ProtectedRoute>} />
+        <Route path="add-schedule/:id" element={<ProtectedRoute>    <AdminDashboard />  </ProtectedRoute>} />
+        <Route path="add-sheet" element={<ProtectedRoute>    <AddSheet />  </ProtectedRoute>} />
+        <Route path="assign-task" element={<ProtectedRoute>    <AssignTask />  </ProtectedRoute>} />
+        <Route path="curr-activity" element={<ProtectedRoute>    <CurrActivity />  </ProtectedRoute>} />
+        <Route path="new-tutor" element={<ProtectedRoute>    <NewTutor />  </ProtectedRoute>} />
+        <Route path="view-curr" element={<ProtectedRoute>    <ViewCurr />  </ProtectedRoute>} />
+        <Route path="create-curr" element={<ProtectedRoute>    <CreateCurriculum />  </ProtectedRoute>} />
         <Route path="edit-curr/:id" element={<ProtectedRoute><EditCurriculum /></ProtectedRoute>} />
         <Route path="batch/:id" element={<ProtectedRoute><BatchDetail /></ProtectedRoute>} />
         <Route path="tutordetails/:id" element={<ProtectedRoute><TutorDetails /></ProtectedRoute>} />
 
-        
-        {/* <Route  path="logout" element={  <ProtectedRoute>    <Logout />  </ProtectedRoute>  }/>   */}
-        
-        
-        
-        
-        </Route>
+{/* <Route  path="logout" element={  <ProtectedRoute>    <Logout />  </ProtectedRoute>  }/>   */}
+
+
+
+
+      </Route>
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,7 +1,7 @@
 // components/Sidebar.js
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MdOutlineDashboard } from "react-icons/md";
+import { MdOutlineDashboard, MdSchedule } from "react-icons/md";
 import { PiStudentBold } from "react-icons/pi";
 import { FaTasks } from "react-icons/fa";
 import { LuSheet } from "react-icons/lu";
@@ -26,11 +26,12 @@ const Sidebar = () => {
       <nav className="space-y-2 flex flex-col items-start">
        <Link to="/dashboard" className={`${linkClasses('/dashboard')} `} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><MdOutlineDashboard className="mr-2 text-2xl" />  Dashboard </Link>
         <Link to="/daily-batch" className={`${linkClasses('/daily-batch')} `}  style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><PiStudentBold className='mr-2 text-2xl'/>Daily Batch</Link>
-        <Link to="/add-task" className={linkClasses('/add-task')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><FaTasks className='mr-2 text-2xl'/> Add Task</Link>
+        <Link to="/add-schedule" className={linkClasses('/add-schedule')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><MdSchedule className='mr-2 text-2xl'/>Schedule Manage</Link>  
+        <Link to="/add-task" className={linkClasses('/add-task')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><FaTasks className='mr-2 text-2xl'/>  Task Management</Link>
         <Link to="/add-sheet" className={linkClasses('/add-sheet')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><LuSheet className='mr-2 text-2xl'/> Add Sheet Links</Link>
         {/* <Link to="/assign-task" className={linkClasses('/assign-task')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><GoTasklist className='mr-2 text-2xl'/> Assign Tasks</Link> */}
         <Link to="/curr-activity" className={linkClasses('/curr-activity')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}><VscLayersActive className='mr-2 text-2xl'/> Curriculum Activity</Link>  
-      {userType==='admin'&&(  <Link to="/new-tutor" className={linkClasses('/new-tutor')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <FaChalkboardTeacher className='mr-2 text-2xl'/>Create New Tutor</Link>)}
+      {userType==='admin'&& (<Link to="/new-tutor" className={linkClasses('/new-tutor')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <FaChalkboardTeacher className='mr-2 text-2xl'/> Tutor Management</Link>)}
         <Link to="/logout" className={linkClasses('/logout')} style={{ display: 'flex',flexDirection:'row',alignItems:'center' }}> <RiLogoutCircleRLine className='mr-2 text-2xl'/>Logout</Link>
       </nav>
     </div>

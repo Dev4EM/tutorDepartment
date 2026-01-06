@@ -14,7 +14,7 @@ const taskRoutes=require('./routes/taskRoutes.js');
 const sheetRoutes=require('./routes/sheetRoutes.js');
 const app = express();
 const adminRoutes = require('./routes/adminRoutes');
-
+const scheduleRoutes = require('./routes/scheduleRoutes.js');
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -28,6 +28,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/sheets', sheetRoutes);
+app.use('/api/schedules', scheduleRoutes);
 app.get('/', (req, res) => {
   res.send('✅ Tutor Dashboard is running');
 });

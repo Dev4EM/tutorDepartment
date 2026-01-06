@@ -1,7 +1,7 @@
 import useUserAuthStore from "./stores/userAuthStore";
 
-const API_BASE_URL = 'https://api.tutor.esromagica.in/api'; // Update if using a different backend URL
-// const API_BASE_URL = 'http://localhost:5000/api'; // Update if using a different backend URL
+// const API_BASE_URL = 'https://api.tutor.esromagica.in/api'; // Update if using a different backend URL
+const API_BASE_URL = 'http://localhost:5000/api'; // Update if using a different backend URL
 
 // Generic request function
 const request = async (endpoint, method, data = null) => {
@@ -170,6 +170,53 @@ export const deleteSheet = async (sheetId) => {
 export const getAllSheets = async () => {
   return request(`/sheets`, 'GET');
 };
+// Delete a task (already in your code)
 export const deleteTask = async (taskId) => {
   return request(`/tasks/${taskId}`, 'DELETE');
+};
+
+// Get schedules
+export const getSchedules = async (startDate, endDate) => {
+  // Construct query string
+  const query = new URLSearchParams({ startDate, endDate }).toString();
+  return request(`/schedules?${query}`, 'GET'); // ✅ send via URL
+};
+
+
+// Create a new schedule
+export const createSchedules = async (taskData) => {
+  return request(`/schedules`, 'POST',taskData);
+};
+
+// Update a schedule
+export const updateSchedules = async (taskId, taskData) => {
+  return request(`/schedules/${taskId}`, 'PUT', { data: taskData });
+};
+
+// Update schedule status for a date
+export const updateSchedulesStatus = async (taskId, date, status) => {
+  return request(`/schedules/${taskId}/status`, 'PATCH', {
+    data: { date, status },
+  });
+};
+
+// Delete a schedule
+export const deleteSchedules = async (taskId, date) => {
+  // add the date as a query parameter if provided
+  const url = date ? `/schedules/${taskId}?date=${date}` : `/schedules/${taskId}`;
+  return request(url, 'DELETE');
+};
+
+export const fetchSchedulesByUser = async (userId, startDate, endDate) => {
+  let url = `/schedules/user/${userId}`;
+  if (startDate && endDate) {
+    url += `?startDate=${startDate}&endDate=${endDate}`;
+  }
+  return request(url, "GET");
+};
+
+// PATCH / UPDATE task status for a specific date
+export const updateTaskStatus = async (taskId, date, status) => {
+  const url = `/schedules/${taskId}/status-update`;
+  return request(url, "PATCH", { date, status });
 };
